@@ -71,7 +71,7 @@ impl EntryTemplateData {
         template: &Path,
         output: &Path,
     ) -> eyre::Result<()> {
-        let mut tera = Tera::default();
+        let mut tera = Tera::parse("templates/*")?;
 
         if let Err(err) = tera.add_template_file(template, Some("post")) {
             bail!(Error::InvalidPostPageTemplate {
@@ -79,6 +79,8 @@ impl EntryTemplateData {
                 reason: err.to_string(),
             });
         }
+
+        tera.build_inheritance_chains()?;
 
         let mut context = Context::new();
         context.insert("entry", self);
@@ -99,13 +101,15 @@ impl EntryTemplateData {
 
 impl FeedTemplateData {
     pub fn render_index(&self, template: &Path, output: &Path) -> eyre::Result<()> {
-        let mut tera = Tera::default();
+        let mut tera = Tera::parse("templates/*")?;
 
         if let Err(err) = tera.add_template_file(template, Some("index")) {
             bail!(Error::InvalidIndexPageTemplate {
                 reason: err.to_string()
             });
         }
+
+        tera.build_inheritance_chains()?;
 
         let mut context = Context::new();
         context.insert("feed", self);
